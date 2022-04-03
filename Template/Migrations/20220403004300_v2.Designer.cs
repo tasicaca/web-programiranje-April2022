@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Template.Models;
 
 namespace Template.Migrations
 {
     [DbContext(typeof(IspitDbContext))]
-    partial class IspitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220403004300_v2")]
+    partial class v2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,8 +48,8 @@ namespace Template.Migrations
                         .HasColumnType("real")
                         .HasColumnName("Duzina");
 
-                    b.Property<int>("Naziv")
-                        .HasColumnType("int")
+                    b.Property<string>("Naziv")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("Brojnost");
 
                     b.Property<bool>("Otpadna")

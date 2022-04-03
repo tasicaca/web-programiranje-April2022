@@ -94,33 +94,11 @@ export class Prodavnica {
                 },
                 
             }).then(p => {
-                if (p.ok) {/*
-                    fetch("https://localhost:5001/Ispit/UcitavanjeTriTopFilmaKategorije/" + izabranaKategorija + "/" + this.id, {
-                        method: "GET",
-                    }).then(p => {
-                        p.json().then(d => {
-                             
-                               var divZaOcene=this.kontejner.querySelector(".divZaCrtanjeOcena");
-                               if (divZaOcene!=null)
-                                { 
-                                   this.kontejner.removeChild(divZaOcene);
-                                }
-                                var divZaCrtanjeOcena = document.createElement("div");
-                                divZaCrtanjeOcena.className = "divZaCrtanjeOcena";
-                                this.kontejner.appendChild(divZaCrtanjeOcena);
-
-                                var film1 =new Film(d[0].id, d[0].ime, d[0].ocena,d[0].brojOcena);
-                                var film2 =new Film(d[1].id, d[1].ime, d[1].ocena,d[1].brojOcena);
-                                var film3 =new Film(d[2].id, d[2].ime, d[2].ocena,d[2].brojOcena);
-                                film1.crtajFilm(divZaCrtanjeOcena);
-                                film2.crtajFilm(divZaCrtanjeOcena);
-                                film3.crtajFilm(divZaCrtanjeOcena);
-
-                            })
-                        })*/
+                if (p.ok) {
+                   
                     alert("Kupljena je ploca");
                 } else {
-                    alert("Greška prilikom upisa.");
+                    alert("Greška prilikom upisa, Najverovatnije dimenzija ploce nije dostupna.");
                 }
             }).catch(p => {
                 alert("Greška prilikom upisa.");

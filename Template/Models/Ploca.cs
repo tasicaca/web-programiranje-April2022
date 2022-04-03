@@ -11,8 +11,8 @@ namespace Template.Models{
         [Column("ID")]    
         public int ID{get;set;}
 
-        [Column("Naziv")]////tu treba da izmenis brojnost ploca i da stavis da imas vise ploca, kao i da promenis ovo za naziv, ali generalno ti radi
-        public string Naziv{get;set;}
+        [Column("Brojnost")]////tu treba da izmenis brojnost ploca i da stavis da imas vise ploca, kao i da promenis ovo za naziv, ali generalno ti radi
+        public int Brojnost{get;set;}
         
         [Column("Duzina")]
         public float Duzina{get;set;}

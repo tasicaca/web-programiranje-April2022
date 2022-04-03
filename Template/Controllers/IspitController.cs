@@ -37,21 +37,59 @@ namespace Template.Controllers
           return await Context.Sara.Include(p=>p.Prodavnica).Where(p=>p.Prodavnica.Contains(vraceneProdavnice)).ToListAsync();
         }
 
-        [Route("IzmenaPodatakaOPloci/{duzina}/{sirina}/{idSare}/{idPloce}")]
+        [Route("IzmenaPodatakaOPloci/{duzina}/{sirina}/{idSare}/{idProd}")]
         [HttpPut]
-        public async Task IzmenaPodatakaOPloci(float duzina, float sirina, int idSare,int idPloce)
+        public async Task<ActionResult> IzmenaPodatakaOPloci(float duzina, float sirina, int idSare,int idProd)
         {
-          var nadjenaPloca = await Context.Ploca.Where(p=>p.Prodavnica.ID==idPloce && p.Sara.ID==idSare).FirstOrDefaultAsync(); ///moras tamo gde je await da imas i async
-          nadjenaPloca.Duzina= nadjenaPloca.Duzina-duzina;
-          nadjenaPloca.Sirina=nadjenaPloca.Sirina-sirina;
-          nadjenaPloca.Otpadna=true;
-          await Context.SaveChangesAsync();
+          var nadjenaPloca = await Context.Ploca.Where(p=>p.Prodavnica.ID==idProd && p.Sara.ID==idSare && p.Otpadna==true  && p.Duzina>=duzina  && p.Sirina>=sirina && p.Brojnost>0).FirstOrDefaultAsync(); ///moras tamo gde je await da imas i async
+          if (nadjenaPloca!=null){
+              //nadjenaPloca.Duzina = nadjenaPloca.Duzina-duzina;
+              nadjenaPloca.Sirina = nadjenaPloca.Sirina-sirina;
+              
+              await Context.SaveChangesAsync();
+              return Ok("IzmenaUspesna");
+          //ukoliko moze koristi otpadnu plocu koja ima dovoljne dimenzije 
+          }
+          
+          else  
+          {//ako je ploca iz te prodavnice i sa odgovarajucom sarom, ali nije otpadna, onda se pravi nova otpadna
+              nadjenaPloca = await Context.Ploca.Where(p=>p.Prodavnica.ID==idProd && p.Sara.ID==idSare && p.Otpadna==false && p.Duzina>=duzina  && p.Sirina>=sirina && p.Brojnost>0).FirstOrDefaultAsync();
+              if (nadjenaPloca!= null){
+              
+              nadjenaPloca.Otpadna=false;
+              nadjenaPloca.Brojnost--;
+              Context.Ploca.Update(nadjenaPloca);
+
+              Ploca NovaPloca= new Ploca();
+              
+              NovaPloca.Brojnost=1;
+              NovaPloca.Duzina=nadjenaPloca.Duzina;
+              NovaPloca.Sirina=nadjenaPloca.Sirina-sirina;
+             
+              NovaPloca.Otpadna=true;
+
+              var Prod=await Context.Prodavnica.Where(p=>p.ID==idProd).FirstOrDefaultAsync();//ono sto si pogresio je to da moras u Contextu naci konkretnu Prodavnicu da bi je dodelio kasnije (Ploca.Prodavnica)
+              var Shara=await Context.Sara.Where(p=>p.ID==idSare).FirstOrDefaultAsync();
+
+              NovaPloca.Prodavnica=Prod;
+              NovaPloca.Sara=Shara;
+              
+              Context.Ploca.Update(NovaPloca);
+             
+              await Context.SaveChangesAsync();
+              return Ok("IzmenaUspesna");
+              }
+          else 
+          {
+            return BadRequest("Neuspesna Kupovina jer nema odgovarajuce ploce");
+          }
         }
     }
 }
+}
+//
 
-
-/*Jedino sto smo dodali je ,
+/*Jedino sto smo dodali u ovom obrascu je ,
   "ConnectionStrings": {
     "IspitCS": "Server=(localdb)\\MSSQLLocalDB;Database=TestBazaPodataka"   
   },
