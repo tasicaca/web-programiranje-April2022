@@ -45,36 +45,41 @@ namespace Template.Controllers
           if (nadjenaPloca!=null){
               //nadjenaPloca.Duzina = nadjenaPloca.Duzina-duzina;
               nadjenaPloca.Sirina = nadjenaPloca.Sirina-sirina;
-              
+
+              if ((nadjenaPloca.Sirina<=0) || (nadjenaPloca.Duzina*nadjenaPloca.Sirina<=0.2*10*10)) 
+                Context.Ploca.Remove(nadjenaPloca);
+
+              else Context.Ploca.Update(nadjenaPloca);
+
               await Context.SaveChangesAsync();
               return Ok("IzmenaUspesna");
-          //ukoliko moze koristi otpadnu plocu koja ima dovoljne dimenzije 
+          //ukoliko moze koristi otpadnu plocu koja ima dovoljne dimenzije
           }
           
           else  
           {//ako je ploca iz te prodavnice i sa odgovarajucom sarom, ali nije otpadna, onda se pravi nova otpadna
-              nadjenaPloca = await Context.Ploca.Where(p=>p.Prodavnica.ID==idProd && p.Sara.ID==idSare && p.Otpadna==false && p.Duzina>=duzina  && p.Sirina>=sirina && p.Brojnost>0).FirstOrDefaultAsync();
+              nadjenaPloca = await Context.Ploca.Where(p=>p.Prodavnica.ID==idProd && p.Sara.ID==idSare && p.Otpadna==false && p.Duzina>=duzina && p.Sirina>=sirina && p.Brojnost>0).FirstOrDefaultAsync();
               if (nadjenaPloca!= null){
-              
-              nadjenaPloca.Otpadna=false;
+        
               nadjenaPloca.Brojnost--;
-              Context.Ploca.Update(nadjenaPloca);
+              if (nadjenaPloca.Brojnost>0)
+                Context.Ploca.Update(nadjenaPloca);
+                else Context.Ploca.Remove(nadjenaPloca);
 
-              Ploca NovaPloca= new Ploca();
+              if (nadjenaPloca.Duzina*(nadjenaPloca.Sirina-sirina)>0.2*10*10) {//10 je dimenzija 
+                Ploca NovaPloca= new Ploca();
+                NovaPloca.Brojnost=1;
+                NovaPloca.Duzina=nadjenaPloca.Duzina;
+                NovaPloca.Sirina=nadjenaPloca.Sirina-sirina;
+                NovaPloca.Otpadna=true;
+
+                var Prod=await Context.Prodavnica.Where(p=>p.ID==idProd).FirstOrDefaultAsync();//ono sto si pogresio je to da moras u Contextu naci konkretnu Prodavnicu da bi je dodelio kasnije (Ploca.Prodavnica)
+                var Shara=await Context.Sara.Where(p=>p.ID==idSare).FirstOrDefaultAsync();
+                NovaPloca.Prodavnica=Prod;
+                NovaPloca.Sara=Shara;
               
-              NovaPloca.Brojnost=1;
-              NovaPloca.Duzina=nadjenaPloca.Duzina;
-              NovaPloca.Sirina=nadjenaPloca.Sirina-sirina;
-             
-              NovaPloca.Otpadna=true;
-
-              var Prod=await Context.Prodavnica.Where(p=>p.ID==idProd).FirstOrDefaultAsync();//ono sto si pogresio je to da moras u Contextu naci konkretnu Prodavnicu da bi je dodelio kasnije (Ploca.Prodavnica)
-              var Shara=await Context.Sara.Where(p=>p.ID==idSare).FirstOrDefaultAsync();
-
-              NovaPloca.Prodavnica=Prod;
-              NovaPloca.Sara=Shara;
-              
-              Context.Ploca.Update(NovaPloca);
+                Context.Ploca.Add(NovaPloca);
+              }
              
               await Context.SaveChangesAsync();
               return Ok("IzmenaUspesna");
